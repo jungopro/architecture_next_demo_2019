@@ -88,3 +88,10 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=pr
 
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 # grafana
 ```
+
+### Remove all resources and destroy the cluster
+
+```bash
+cd aks
+terraform destroy -var=client_secret=<your-client-secret> -var=kubeconfig_path="/root/.kube/demo-aks.yaml"
+```
