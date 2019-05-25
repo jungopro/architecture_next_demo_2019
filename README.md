@@ -20,9 +20,9 @@ cd architecture_next_demo_2019/aks
 ### TerraformIT
 
 ```bash
-terraform init
-terraform plan -var=client_secret=<your-client-secret> -var=kubeconfig_path="/root/.kube/demo-aks.yaml"
-terraform apply -var=client_secret=<your-client-secret> -var=kubeconfig_path="/root/.kube/demo-aks.yaml"
+tf12 init
+tf12 plan -var=client_secret=<your-client-secret> -var=kubeconfig_path="/root/.kube/demo-aks.yaml"
+tf12 apply -var=client_secret=<your-client-secret> -var=kubeconfig_path="/root/.kube/demo-aks.yaml"
 ```
 
 ### Connect to your cluster
