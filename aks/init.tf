@@ -12,8 +12,14 @@ provider "null" {
   version = "~> 2.1.2"
 }
 
-terraform {
-  backend "azurerm" {
-  }
+provider "local" {
+  version = "~> 1.2"
 }
 
+provider "template" {
+  version = "~> 2.1"
+}
+
+terraform {
+  backend "azurerm" {}
+}
