@@ -27,6 +27,13 @@ resource "azurerm_subnet" "subnet" {
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
 }
 
+resource "azurerm_subnet" "vk_subnet" {
+  name                 = "aks-subnet"
+  resource_group_name  = "${azurerm_resource_group.resource_group.name}"
+  address_prefix       = "10.241.0.0/24"
+  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+}
+
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "demo-aks"
   location            = "${azurerm_resource_group.resource_group.location}"
@@ -36,7 +43,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   agent_pool_profile {
     name            = "default"
-    count           = 3
+    count           = "${var.node_count}"
     vm_size         = "Standard_DS2_v2"
     os_type         = "Linux"
     os_disk_size_gb = 30
@@ -54,6 +61,13 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   role_based_access_control {
     enabled = true
+  }
+
+  addon_profile {
+    aci_connector_linux {
+      enabled = true
+      subnet_name = "${azurerm_subnet.vk_subnet.name}"
+    }
   }
 
   tags = {
