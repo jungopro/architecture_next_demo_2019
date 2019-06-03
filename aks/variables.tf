@@ -10,3 +10,45 @@ variable "node_count" {
   description = "the number of worker nodes in the pool"
   default = 2
 }
+
+variable "aks_subnet_name" {
+  description = "the name of the subnet for the aks nodes"
+  default = "aks-subnet"
+}
+
+variable "vk_subnet_name" {
+  description = "the name of the subnet for the virtual kubelet"
+  default = "vk-subnet"
+}
+
+variable "vnet_name" {
+  description = "the name of the vnet"
+  default = "aks-vnet"
+}
+
+
+variable "vnet_address_space" {
+  description = "list of address spaces for the vnet"
+  type = "list"
+  default = ["10.0.0.0/8"]
+}
+
+variable "aks_subnet_address" {
+  description = "the network address for the aks subnet"
+  default = "10.240.0.0/24"
+}
+
+variable "vk_subnet_address" {
+  description = "the network address for the aks subnet"
+  default = "10.241.0.0/24"
+}
+
+variable "cluster_name" {
+  description = "the name of the aks cluster. also the dns prefix"
+  default = "playks"
+}
+
+variable "kubernetes_version" {
+  description = "the kubernetes version to use"
+  default = "1.13.5"
+}

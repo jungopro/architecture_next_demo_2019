@@ -10,36 +10,44 @@ resource "azurerm_resource_group" "resource_group" {
 }
 
 resource "azurerm_virtual_network" "vnet" {
-  name                = "aks-vnet"
+  name                = "${var.vnet_name}"
   location            = "${azurerm_resource_group.resource_group.location}"
   resource_group_name = "${azurerm_resource_group.resource_group.name}"
-  address_space       = ["10.0.0.0/8"]
+  address_space       = "${var.vnet_address_space}"
 
   tags = {
     environment = "aks"
   }
 }
 
-resource "azurerm_subnet" "subnet" {
-  name                 = "aks-subnet"
+resource "azurerm_subnet" "aks_subnet" {
+  name                 = "${var.aks_subnet_name}"
   resource_group_name  = "${azurerm_resource_group.resource_group.name}"
-  address_prefix       = "10.240.0.0/24"
+  address_prefix       = "${var.aks_subnet_address}"
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
 }
 
 resource "azurerm_subnet" "vk_subnet" {
-  name                 = "aks-subnet"
+  name                 = "${var.vk_subnet_name}"
   resource_group_name  = "${azurerm_resource_group.resource_group.name}"
-  address_prefix       = "10.241.0.0/24"
+  address_prefix       = "${var.vk_subnet_address}"
   virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+
+  delegation {
+    name = "aciDelegation"
+    service_delegation {
+      name    = "Microsoft.ContainerInstance/containerGroups"
+      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+    }
+  }
 }
 
 resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "demo-aks"
+  name                = "${var.cluster_name}"
   location            = "${azurerm_resource_group.resource_group.location}"
   resource_group_name = "${azurerm_resource_group.resource_group.name}"
-  dns_prefix          = "demo-aks"
-  kubernetes_version  = "1.13.5"
+  dns_prefix          = "${var.cluster_name}"
+  kubernetes_version  = "${var.kubernetes_version}"
 
   agent_pool_profile {
     name            = "default"
@@ -47,7 +55,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vm_size         = "Standard_DS2_v2"
     os_type         = "Linux"
     os_disk_size_gb = 30
-    vnet_subnet_id  = "${azurerm_subnet.subnet.id}"
+    vnet_subnet_id  = "${azurerm_subnet.aks_subnet.id}"
   }
 
   network_profile {
