@@ -8,8 +8,14 @@ variable "kubeconfig_path" {
 
 variable "node_count" {
   description = "the number of worker nodes in the pool"
-  default = 2
+  default = 3
 }
+
+variable "max_pods" {
+  description = "The maximum number of pods that can run on each agent"
+  default = 30
+}
+
 
 variable "aks_subnet_name" {
   description = "the name of the subnet for the aks nodes"
@@ -37,6 +43,7 @@ variable "aks_subnet_address" {
   description = "the network address for the aks subnet"
   default = "10.240.0.0/24"
 }
+
 
 variable "vk_subnet_address" {
   description = "the network address for the aks subnet"
