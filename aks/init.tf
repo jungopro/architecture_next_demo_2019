@@ -13,5 +13,7 @@ provider "null" {
 }
 
 terraform {
-  backend "azurerm" {}
+  backend "azurerm" {
+  }
 }
+

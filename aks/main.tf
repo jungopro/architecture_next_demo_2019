@@ -1,6 +1,7 @@
 ## Query ##
 
-data "azurerm_client_config" "current" {}
+data "azurerm_client_config" "current" {
+}
 
 ## Create
 
@@ -11,9 +12,9 @@ resource "azurerm_resource_group" "resource_group" {
 
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.vnet_name}-${terraform.workspace}"
-  location            = "${azurerm_resource_group.resource_group.location}"
-  resource_group_name = "${azurerm_resource_group.resource_group.name}"
-  address_space       = "${var.vnet_address_space}"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  address_space       = var.vnet_address_space
 
   tags = {
     environment = "aks"
@@ -22,16 +23,16 @@ resource "azurerm_virtual_network" "vnet" {
 
 resource "azurerm_subnet" "aks_subnet" {
   name                 = "${var.aks_subnet_name}-${terraform.workspace}"
-  resource_group_name  = "${azurerm_resource_group.resource_group.name}"
-  address_prefix       = "${var.aks_subnet_address}"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+  resource_group_name  = azurerm_resource_group.resource_group.name
+  address_prefix       = var.aks_subnet_address
+  virtual_network_name = azurerm_virtual_network.vnet.name
 }
 
 resource "azurerm_subnet" "vk_subnet" {
   name                 = "${var.vk_subnet_name}-${terraform.workspace}"
-  resource_group_name  = "${azurerm_resource_group.resource_group.name}"
-  address_prefix       = "${var.vk_subnet_address}"
-  virtual_network_name = "${azurerm_virtual_network.vnet.name}"
+  resource_group_name  = azurerm_resource_group.resource_group.name
+  address_prefix       = var.vk_subnet_address
+  virtual_network_name = azurerm_virtual_network.vnet.name
 
   delegation {
     name = "aciDelegation"
@@ -45,19 +46,19 @@ resource "azurerm_subnet" "vk_subnet" {
 
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "${var.cluster_name}-${terraform.workspace}"
-  location            = "${azurerm_resource_group.resource_group.location}"
-  resource_group_name = "${azurerm_resource_group.resource_group.name}"
-  dns_prefix          = "${var.cluster_name}"
-  kubernetes_version  = "${var.kubernetes_version}"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  dns_prefix          = var.cluster_name
+  kubernetes_version  = var.kubernetes_version
 
   agent_pool_profile {
     name            = "default"
-    count           = "${var.node_count}"
+    count           = var.node_count
     vm_size         = "Standard_DS2_v2"
     os_type         = "Linux"
     os_disk_size_gb = 30
-    max_pods        = "${var.max_pods}"
-    vnet_subnet_id  = "${azurerm_subnet.aks_subnet.id}"
+    max_pods        = var.max_pods
+    vnet_subnet_id  = azurerm_subnet.aks_subnet.id
   }
 
   network_profile {
@@ -65,8 +66,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   service_principal {
-    client_id     = "${data.azurerm_client_config.current.client_id}"
-    client_secret = "${var.client_secret}"
+    client_id     = data.azurerm_client_config.current.client_id
+    client_secret = var.client_secret
   }
 
   role_based_access_control {
@@ -76,7 +77,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   addon_profile {
     aci_connector_linux {
       enabled     = true
-      subnet_name = "${azurerm_subnet.vk_subnet.name}"
+      subnet_name = azurerm_subnet.vk_subnet.name
     }
   }
 
@@ -84,3 +85,4 @@ resource "azurerm_kubernetes_cluster" "aks" {
     Environment = "aks"
   }
 }
+
