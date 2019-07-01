@@ -6,8 +6,8 @@ data "azurerm_client_config" "current" {
 ## Create
 
 resource "azurerm_resource_group" "resource_group" {
-  name     = "aks"
-  location = "West Europe"
+  name     = var.aks_vnet_name
+  location = var.location
 }
 
 resource "azurerm_virtual_network" "vnet" {
@@ -17,7 +17,7 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = var.vnet_address_space
 
   tags = {
-    environment = "aks"
+    environment = "dev"
   }
 }
 
@@ -62,7 +62,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     type            = "VirtualMachineScaleSets"
   }
 
-  agent_pool_profile {
+  /*agent_pool_profile {
     name            = "gpu"
     count           = var.gpu_node_count
     vm_size         = "Standard_NC6"
@@ -71,7 +71,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     max_pods        = var.max_pods
     vnet_subnet_id  = azurerm_subnet.aks_subnet.id
     type            = "VirtualMachineScaleSets"
-  }
+  }*/
 
   network_profile {
     network_plugin = "azure"
@@ -94,7 +94,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   tags = {
-    Environment = "aks"
+    Environment = "dev"
   }
 }
 

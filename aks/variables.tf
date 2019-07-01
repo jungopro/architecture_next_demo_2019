@@ -3,6 +3,12 @@
 variable "client_secret" {
 }
 
+variable "location" {
+  description = "Azure Location"
+  default = "West Europe"
+}
+
+
 variable "kubeconfig_path" {
   description = "full path to save the kubeconfig in (e.g. /root/.kube/mycluster.yaml). make sure to add this file to KUBECONFIG (e.g. export KUBECONFIG=$KUBECONFIG:/root/.kube/mycluster.yaml) in order to add it to your list of clusters"
 }
@@ -20,6 +26,11 @@ variable "gpu_node_count" {
 variable "max_pods" {
   description = "The maximum number of pods that can run on each agent"
   default     = 30
+}
+
+variable "aks_vnet_name" {
+  description = "the name of the vnet for the aks cluster"
+  default     = "aks"
 }
 
 variable "aks_subnet_name" {
