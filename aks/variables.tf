@@ -9,7 +9,12 @@ variable "kubeconfig_path" {
 
 variable "node_count" {
   description = "the number of worker nodes in the pool"
-  default     = 3
+  default     = 2
+}
+
+variable "gpu_node_count" {
+  description = "the number of worker nodes in the pool"
+  default     = 2
 }
 
 variable "max_pods" {
