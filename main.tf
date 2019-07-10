@@ -5,8 +5,13 @@ data "azurerm_client_config" "current" {
 
 ## Create
 
+resource "random_integer" "uuid" { 
+  min = 100
+  max = 999
+}
+
 resource "azurerm_resource_group" "resource_group" {
-  name     = var.aks_vnet_name
+  name     = var.aks_rg_name
   location = var.location
 }
 
@@ -15,6 +20,19 @@ resource "azurerm_virtual_network" "vnet" {
   location            = azurerm_resource_group.resource_group.location
   resource_group_name = azurerm_resource_group.resource_group.name
   address_space       = var.vnet_address_space
+
+  tags = {
+    environment = "dev"
+  }
+}
+
+resource "azurerm_public_ip" "ingress_ip" {
+  name                = "${azurerm_resource_group.resource_group.name}${random_integer.uuid.result}pip"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+
+  allocation_method = "Static"
+  domain_name_label            = "${azurerm_resource_group.resource_group.name}${random_integer.uuid.result}"
 
   tags = {
     environment = "dev"
@@ -98,3 +116,45 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
+resource "azurerm_dns_zone" "jungo" {
+  name                = "jungopro.com"
+  resource_group_name = azurerm_resource_group.resource_group.name
+  zone_type           = "Public"
+}
+
+resource "azurerm_dns_a_record" "jenkins" {
+  name                = "jenkins"
+  zone_name           = azurerm_dns_zone.jungo.name
+  resource_group_name = azurerm_resource_group.resource_group.name
+  ttl                 = 300
+  records             = [azurerm_public_ip.ingress_ip.ip_address]
+}
+
+resource "azurerm_dns_a_record" "spinnaker_ingress" {
+  name                = "spinnaker"
+  zone_name           = azurerm_dns_zone.jungo.name
+  resource_group_name = azurerm_resource_group.resource_group.name
+  ttl                 = 300
+  records             = [azurerm_public_ip.ingress_ip.ip_address]
+}
+
+resource "azurerm_dns_a_record" "spinnaker_ingress_gate" {
+  name                = "gate.spinnaker"
+  zone_name           = azurerm_dns_zone.jungo.name
+  resource_group_name = azurerm_resource_group.resource_group.name
+  ttl                 = 300
+  records             = [azurerm_public_ip.ingress_ip.ip_address]
+}
+
+resource "godaddy_domain_record" "jungo" {
+  domain   = azurerm_dns_zone.jungo.name  
+  nameservers = azurerm_dns_zone.jungo.name_servers
+}
+
+resource "azurerm_dns_a_record" "hipster" {
+  name                = "hipster"
+  zone_name           = azurerm_dns_zone.jungo.name
+  resource_group_name = azurerm_resource_group.resource_group.name
+  ttl                 = 300
+  records             = ["${data.kubernetes_service.istio_ingressgateway.load_balancer_ingress.0.ip}"]
+}
