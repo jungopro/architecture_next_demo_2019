@@ -32,7 +32,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   location            = "${azurerm_resource_group.resource_group.location}"
   resource_group_name = "${azurerm_resource_group.resource_group.name}"
   dns_prefix          = "demo-aks"
-  kubernetes_version  = "1.13.5"
+  kubernetes_version  = "1.13.7"
 
   agent_pool_profile {
     name            = "default"
@@ -41,6 +41,14 @@ resource "azurerm_kubernetes_cluster" "aks" {
     os_type         = "Linux"
     os_disk_size_gb = 30
     vnet_subnet_id  = "${azurerm_subnet.subnet.id}"
+  }
+
+  linux_profile {
+    admin_username = "k8sadmin"
+
+    ssh_key {
+      key_data = "${file("/Users/omerbarel/.ssh/id_rsa.pub")}"
+    }
   }
 
   network_profile {
@@ -59,4 +67,42 @@ resource "azurerm_kubernetes_cluster" "aks" {
   tags = {
     Environment = "aks"
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+provider "kubernetes" {
+  version     = "~> 1.8"
+  config_path = "${var.kubeconfig_path}"
+}
+
+resource "kubernetes_service_account" "tiller_sa" {
+  metadata {
+    name      = "tiller"
+    namespace = "kube-system"
+  }
+
+  depends_on = ["azurerm_kubernetes_cluster.aks", "local_file.kubeconfig"]
+}
+
+resource "kubernetes_cluster_role_binding" "tiller_sa_cluster_admin_rb" {
+  metadata {
+    name = "tiller-cluster-role"
+  }
+
+  role_ref {
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+    api_group = "rbac.authorization.k8s.io"
+  }
+
+  subject {
+    kind      = "ServiceAccount"
+    name      = "${kubernetes_service_account.tiller_sa.metadata.0.name}"
+    namespace = "kube-system"
+  }
+
+  depends_on = ["azurerm_kubernetes_cluster.aks", "local_file.kubeconfig"]
 }
