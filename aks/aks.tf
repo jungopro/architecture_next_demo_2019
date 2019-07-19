@@ -8,32 +8,6 @@ resource "azurerm_resource_group" "resource_group" {
   location = var.location
 }
 
-# service principal for aks
-resource "azuread_application" "aks" {
-  name = "${terraform.workspace}-${random_integer.uuid.result}-aks"
-}
-
-resource "azuread_service_principal" "aks" {
-  application_id = azuread_application.aks.application_id
-}
-
-resource "random_string" "aks-principal-secret" {
-  length  = 32
-  special = true
-}
-
-resource "azuread_service_principal_password" "aks" {
-  service_principal_id = azuread_service_principal.aks.id
-  value                = random_string.aks-principal-secret.result
-  end_date_relative    = "17520h"
-}
-
-resource "azurerm_role_assignment" "aks-network-contributor" {
-  scope                = azurerm_resource_group.resource_group.id
-  role_definition_name = "Network Contributor"
-  principal_id         = azuread_service_principal.aks.id
-}
-
 resource "azurerm_virtual_network" "vnet" {
   name                = "${var.vnet_name}-${terraform.workspace}"
   location            = azurerm_resource_group.resource_group.location
@@ -114,8 +88,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   service_principal {
-    client_id     = azuread_application.aks.application_id
-    client_secret = azuread_service_principal_password.aks.value
+    client_id     = data.azurerm_client_config.current.client_id
+    client_secret = var.client_secret
   }
 
   role_based_access_control {
@@ -131,6 +105,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   tags = {
     Environment = "${terraform.workspace}"
+  }
+
+  provisioner "local-exec" {
+    command = "sleep 60"
   }
 }
 
