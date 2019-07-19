@@ -1,5 +1,7 @@
 ## Vars
 
+variable "client_secret" {}
+
 variable "location" {
   description = "Azure Location"
 }

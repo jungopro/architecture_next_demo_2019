@@ -7,7 +7,7 @@ resource "local_file" "kubeconfig" {
 
   # helm init
   provisioner "local-exec" {
-    command = "helm init --client-only; sleep 60"
+    command = "helm init --client-only"
     environment = {
       KUBECONFIG = var.kubeconfig_path
     }
