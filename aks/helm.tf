@@ -47,7 +47,7 @@ resource "helm_release" "istio_init" {
   ]
 
   provisioner "local-exec" {
-    command = "sleep 60"
+    command = "sleep 300"
   }
 }
 

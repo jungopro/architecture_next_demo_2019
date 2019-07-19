@@ -30,8 +30,6 @@ resource "azurerm_public_ip" "ingress_ip" {
   tags = {
     environment = "dev"
   }
-
-  depends_on = [azurerm_kubernetes_cluster.aks]
 }
 
 resource "azurerm_subnet" "aks_subnet" {
@@ -107,9 +105,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     Environment = "${terraform.workspace}"
   }
 
-  provisioner "local-exec" {
-    command = "sleep 60"
-  }
+  depends_on = [azurerm_public_ip.ingress_ip]
 }
 
 resource "azurerm_dns_zone" "dns_zone" {
