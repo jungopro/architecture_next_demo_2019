@@ -1,6 +1,6 @@
 location = "west europe"
 
-node_count = 4
+node_count = 2
 
 gpu_node_count = 2
 
@@ -24,7 +24,7 @@ cluster_name = "playks"
 
 kubernetes_version = "1.13.7"
 
-vm_size = "Standard_B2ms"
+vm_size = "Standard_D2s_v3"
 
 ssh_public_key = "/Users/omerbarel/.ssh/id_rsa.pub"
 

@@ -4,7 +4,7 @@ resource "random_integer" "uuid" {
 }
 
 resource "azurerm_resource_group" "resource_group" {
-  name     = var.aks_rg_name
+  name     = "${var.aks_rg_name}-${terraform.workspace}"
   location = var.location
 }
 
